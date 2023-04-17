@@ -1,0 +1,38 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model inventory {
+    person_id    BigInt
+    medicine_id  BigInt
+    is_available Boolean? @default(false)
+    medicine     medicine @relation(fields: [medicine_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+    person       person   @relation(fields: [person_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+    @@id([person_id, medicine_id])
+}
+
+model medicine {
+    id              BigInt      @id @unique @default(autoincrement())
+    name            String?
+    scientific_name String?
+    agent           String?
+    company         String?
+    region          String?
+    inventory       inventory[]
+}
+
+model person {
+    id           BigInt      @id @default(autoincrement())
+    name         String?
+    phone_number String?     @unique
+    address      String?
+    coordinates  Json?       @db.Json
+    created_at   DateTime?   @default(now()) @db.Timestamptz(6)
+    inventory    inventory[]
+}
